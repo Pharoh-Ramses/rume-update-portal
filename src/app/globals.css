@@ -1,0 +1,381 @@
+@import url("https://fonts.googleapis.com/css2?family=Mona+Sans:ital,wght@0,200..900;1,200..900&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --font-sans:
+    "Mona Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Custom Colors */
+  --color-rume-blue: #E6EDFA;
+
+  /* Light Mode Colors */
+  --color-bg-light: #ffffff;
+  --color-bg-light-alt: #f5f7fa;
+  --color-text-light: #1a2233;
+  --color-accent-blue-light: #246fff;
+  --color-accent-gold-light: #ffc34d;
+  --color-accent-teal-light: #009e98;
+  --color-secondary-light: #a3acb9;
+
+  /* Dark Mode Colors */
+  --color-bg-dark: #1a2233;
+  --color-bg-dark-alt: #23272e;
+  --color-text-dark: #ffffff;
+  --color-text-dark-alt: #e6eaf2;
+  --color-accent-gold-dark: #ffd664;
+  --color-accent-blue-dark: #53a5f4;
+  --color-accent-teal-dark: #33c9b5;
+  --color-secondary-dark: #6c7586;
+
+  /* Badge Colors (unchanged for ratings) */
+  --color-badge-green: #d5faf1;
+  --color-badge-red: #f9e3e2;
+  --color-badge-yellow: #fceed8;
+  --color-badge-green-text: #254d4a;
+  --color-badge-red-text: #752522;
+  --color-badge-yellow-text: #73321b;
+
+  /* Utility classes for badges */
+  --bg-badge-green: var(--color-badge-green);
+  --bg-badge-red: var(--color-badge-red);
+  --bg-badge-yellow: var(--color-badge-yellow);
+
+  /* Dynamic theme variables (default to light mode) */
+  --color-bg: var(--color-bg-light);
+  --color-bg-alt: var(--color-bg-light-alt);
+  --color-text: var(--color-text-light);
+  --color-accent-blue: var(--color-accent-blue-light);
+  --color-accent-gold: var(--color-accent-gold-light);
+  --color-accent-teal: var(--color-accent-teal-light);
+  --color-secondary: var(--color-secondary-light);
+}
+
+html,
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+  min-height: 100vh;
+}
+
+/* Dark mode styles */
+html.dark {
+  --color-bg: var(--color-bg-dark);
+  --color-bg-alt: var(--color-bg-dark-alt);
+  --color-text: var(--color-text-dark);
+  --color-accent-blue: var(--color-accent-blue-dark);
+  --color-accent-gold: var(--color-accent-gold-dark);
+  --color-accent-teal: var(--color-accent-teal-dark);
+  --color-secondary: var(--color-secondary-dark);
+}
+
+main {
+  @apply min-h-screen;
+}
+h1 {
+  @apply max-sm:text-[3rem] text-6xl  text-gradient leading-tight xl:tracking-[-2px] font-semibold;
+}
+
+h2 {
+  @apply max-sm:text-xl text-3xl;
+  color: var(--color-secondary);
+}
+
+label {
+  color: var(--color-secondary);
+}
+input {
+  @apply w-full p-4 inset-shadow rounded-2xl focus:outline-none;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-secondary);
+}
+
+textarea {
+  @apply w-full p-4 inset-shadow rounded-2xl focus:outline-none;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-secondary);
+}
+
+html.dark input,
+html.dark textarea {
+  background-color: rgba(26, 34, 51, 0.8);
+  border: 1px solid rgba(108, 117, 134, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+form {
+  @apply flex flex-col items-start gap-8 w-full;
+}
+
+@layer components {
+  .text-gradient {
+    background: linear-gradient(
+      to right,
+      var(--color-accent-gold),
+      var(--color-accent-blue),
+      var(--color-accent-teal)
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+  .gradient-border {
+    background: linear-gradient(
+      to bottom,
+      var(--color-accent-blue),
+      var(--color-accent-teal)
+    );
+    padding: 1px;
+    border-radius: 1rem;
+  }
+  .gradient-border > * {
+    background-color: var(--color-bg);
+    border-radius: calc(1rem - 1px);
+    padding: 1rem;
+  }
+  .primary-button {
+    background: linear-gradient(
+      to bottom,
+      var(--color-accent-blue),
+      var(--color-accent-teal)
+    );
+    color: white;
+    border-radius: 9999px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+  .primary-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  .resume-nav {
+    @apply flex flex-row justify-between items-center p-4 border-b border-gray-200;
+  }
+  .resume-summary {
+    @apply flex flex-row items-center justify-center p-4 gap-4;
+    .category {
+      @apply flex flex-row gap-2 items-center bg-gray-50 rounded-2xl p-4 w-full justify-between;
+    }
+  }
+  .back-button {
+    @apply flex flex-row items-center gap-2 rounded-lg p-2 shadow-sm;
+    border: 1px solid var(--color-secondary);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+  .auth-button {
+    background: linear-gradient(
+      to bottom,
+      var(--color-accent-blue),
+      var(--color-accent-teal)
+    );
+    border-radius: 9999px;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    width: 600px;
+    max-width: 100%;
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: white;
+    transition: all 0.3s ease;
+  }
+  .auth-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  .main-section {
+    @apply flex flex-col items-center gap-8 pt-12 max-sm:mx-2 mx-15 pb-5;
+  }
+  .page-heading {
+    @apply flex flex-col items-center gap-8 max-w-4xl text-center max-sm:gap-4;
+  }
+  .resumes-section {
+    @apply flex flex-wrap max-md:flex-col max-md:gap-4 gap-6 items-start max-md:items-center w-full max-w-[1850px] justify-evenly;
+  }
+
+  .resume-card {
+    @apply flex flex-col gap-8 h-[560px] w-[350px] lg:w-[430px] xl:w-[490px] rounded-2xl p-4;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-secondary);
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(10px);
+  }
+
+  html.dark .resume-card {
+    background-color: rgba(26, 34, 51, 0.8);
+    border: 1px solid rgba(108, 117, 134, 0.3);
+  }
+
+  .resume-card-header {
+    @apply flex flex-row gap-2 justify-between min-h-[110px] max-sm:flex-col items-center max-md:justify-center max-md:items-center;
+  }
+
+  .feedback-section {
+    @apply flex flex-col gap-8 w-1/2 px-8 max-lg:w-full py-6;
+  }
+
+  .navbar {
+    @apply flex flex-row justify-between items-center rounded-full p-4 w-full px-10 max-w-[1200px] mx-auto;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-secondary);
+    box-shadow:
+      0 1px 3px 0 rgba(0, 0, 0, 0.1),
+      0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(10px);
+  }
+
+  html.dark .navbar {
+    background-color: rgba(26, 34, 51, 0.9);
+    border: 1px solid rgba(108, 117, 134, 0.3);
+  }
+
+  .score-badge {
+    @apply flex flex-row items-center justify-center py-1 px-2 gap-4 rounded-[96px];
+  }
+
+  .form-div {
+    @apply flex flex-col gap-2 w-full items-start;
+  }
+
+  .uplader-drag-area {
+    @apply relative p-8 text-center transition-all duration-700 cursor-pointer rounded-2xl min-h-[208px];
+    background-color: var(--color-bg-alt);
+    border: 2px dashed var(--color-secondary);
+    color: var(--color-text);
+  }
+  .uploader-selected-file {
+    @apply flex items-center justify-between p-3 rounded-2xl;
+    background-color: var(--color-bg-alt);
+    color: var(--color-text);
+  }
+
+  html.dark .uplader-drag-area {
+    background-color: rgba(35, 39, 46, 0.8);
+    border: 2px dashed rgba(108, 117, 134, 0.5);
+    backdrop-filter: blur(10px);
+  }
+
+  html.dark .uploader-selected-file {
+    background-color: rgba(35, 39, 46, 0.8);
+    backdrop-filter: blur(10px);
+  }
+}
+
+@utility bg-gradient {
+  background: linear-gradient(
+    to bottom,
+    var(--color-bg-alt) 60%,
+    var(--color-accent-teal)
+  );
+}
+
+@utility text-gradient {
+  background: linear-gradient(
+    to right,
+    var(--color-accent-gold),
+    var(--color-accent-blue),
+    var(--color-accent-teal)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@utility gradient-hover {
+  background: linear-gradient(
+    to bottom,
+    var(--color-accent-blue),
+    var(--color-accent-teal)
+  );
+}
+
+@utility primary-gradient {
+  background: linear-gradient(
+    to bottom,
+    var(--color-accent-blue),
+    var(--color-accent-teal)
+  );
+}
+
+@utility primary-gradient-hover {
+  background: linear-gradient(
+    to bottom,
+    var(--color-accent-gold),
+    var(--color-accent-blue)
+  );
+}
+
+@utility bg-badge-green {
+  background-color: var(--color-badge-green);
+}
+
+@utility bg-badge-red {
+  background-color: var(--color-badge-red);
+}
+
+@utility bg-badge-yellow {
+  background-color: var(--color-badge-yellow);
+}
+
+/* Dark mode background with blur */
+.dark-bg-blurred {
+  position: relative;
+  background-image: url("/images/darkmode-bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.dark-bg-blurred::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("/images/darkmode-bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(8px);
+  z-index: -2;
+}
+
+.dark-bg-blurred::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(26, 34, 51, 0.6);
+  z-index: -1;
+}
+
+@utility inset-shadow {
+  box-shadow: inset 0 0 12px 0 rgba(36, 99, 235, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+@utility bg-rume-blue {
+  background-color: var(--color-rume-blue);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
