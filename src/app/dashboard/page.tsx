@@ -2,9 +2,10 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ServicesTable from '@/components/dashboard/services-table';
 import InsurancePanel from '@/components/dashboard/insurance-panel';
+import PaymentInterface from '@/components/dashboard/payment-interface';
 import { Service, InsuranceCard, Patient } from '@/lib/db/schema';
 
 interface ServiceTotals {
@@ -44,6 +45,7 @@ export default function DashboardPage() {
     savingsPercentage: 0,
     selectedCount: 0
   });
+  const [showPaymentInterface, setShowPaymentInterface] = useState(false);
 
   // Fetch dashboard data when component mounts and user is authenticated
   useEffect(() => {
@@ -69,9 +71,15 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSelectionChange = (selected: Service[], totals: ServiceTotals) => {
+  const handleSelectionChange = useCallback((selected: Service[], totals: ServiceTotals) => {
     setSelectedServices(selected);
     setSelectedTotals(totals);
+  }, []);
+
+  const handlePaymentSuccess = () => {
+    setShowPaymentInterface(false);
+    setSelectedServices([]);
+    fetchDashboardData(); // Refresh dashboard data
   };
 
   if (status === 'loading') {
@@ -161,14 +169,29 @@ export default function DashboardPage() {
             />
             
             {/* Action Buttons */}
-            {selectedServices.length > 0 && (
+            {selectedServices.length > 0 && !showPaymentInterface && (
               <div className="mt-6 flex flex-col sm:flex-row gap-4">
-                <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                <button 
+                  onClick={() => setShowPaymentInterface(true)}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                >
                   Pay Selected Services ({selectedTotals.selectedCount})
                 </button>
                 <button className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
                   Update Insurance Instead
                 </button>
+              </div>
+            )}
+
+            {/* Payment Interface */}
+            {showPaymentInterface && selectedServices.length > 0 && (
+              <div className="mt-6">
+                <PaymentInterface
+                  selectedServices={selectedServices}
+                  totals={selectedTotals}
+                  onPaymentSuccess={handlePaymentSuccess}
+                  onCancel={() => setShowPaymentInterface(false)}
+                />
               </div>
             )}
           </div>

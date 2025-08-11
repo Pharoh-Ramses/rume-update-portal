@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Service } from '@/lib/db/schema';
 import { Check, AlertCircle, Phone, Calendar, DollarSign } from 'lucide-react';
 
@@ -26,17 +26,18 @@ export default function ServicesTable({
   const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
-  // Calculate totals whenever selection changes
-  const totals = calculateTotals(services, selectedServices);
+  // Calculate totals for display (memoized to prevent infinite loops)
+  const totals = useMemo(() => calculateTotals(services, selectedServices), [services, selectedServices]);
 
   useEffect(() => {
     if (onSelectionChange) {
       const selectedServiceObjects = services.filter(service => 
         selectedServices.has(service.id)
       );
-      onSelectionChange(selectedServiceObjects, totals);
+      const calculatedTotals = calculateTotals(services, selectedServices);
+      onSelectionChange(selectedServiceObjects, calculatedTotals);
     }
-  }, [selectedServices, services, totals, onSelectionChange]);
+  }, [selectedServices, services, onSelectionChange]);
 
   const handleSelectAll = () => {
     const unpaidServices = services.filter(service => !service.isPaid);
