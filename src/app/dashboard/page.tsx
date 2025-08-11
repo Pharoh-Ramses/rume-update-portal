@@ -2,10 +2,77 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import ServicesTable from '@/components/dashboard/services-table';
+import InsurancePanel from '@/components/dashboard/insurance-panel';
+import { Service, InsuranceCard, Patient } from '@/lib/db/schema';
+
+interface ServiceTotals {
+  originalTotal: number;
+  discountedTotal: number;
+  savings: number;
+  savingsPercentage: number;
+  selectedCount: number;
+}
+
+interface DashboardData {
+  patient: Patient;
+  services: Service[];
+  insuranceCard: InsuranceCard | null;
+  summary: {
+    servicesTotal: number;
+    servicesPaid: number;
+    servicesUnpaid: number;
+    hasInsurance: boolean;
+    hasActiveInsurance: boolean;
+    insuranceNeedsReview: boolean;
+    totalOriginalAmount: number;
+    totalDiscountedAmount: number;
+  };
+}
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [selectedServices, setSelectedServices] = useState<Service[]>([]);
+  const [selectedTotals, setSelectedTotals] = useState<ServiceTotals>({
+    originalTotal: 0,
+    discountedTotal: 0,
+    savings: 0,
+    savingsPercentage: 0,
+    selectedCount: 0
+  });
+
+  // Fetch dashboard data when component mounts and user is authenticated
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchDashboardData();
+    }
+  }, [session?.user?.id]);
+
+  const fetchDashboardData = async () => {
+    try {
+      setDashboardLoading(true);
+      const response = await fetch('/api/patient/dashboard');
+      if (response.ok) {
+        const data = await response.json();
+        setDashboardData(data);
+      } else {
+        console.error('Failed to fetch dashboard data');
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setDashboardLoading(false);
+    }
+  };
+
+  const handleSelectionChange = (selected: Service[], totals: ServiceTotals) => {
+    setSelectedServices(selected);
+    setSelectedTotals(totals);
+  };
 
   if (status === 'loading') {
     return (
@@ -34,7 +101,18 @@ export default function DashboardPage() {
                 Insurance & Payment Dashboard
               </h1>
               <p className="mt-2 text-gray-600">
-                Welcome back, {session?.user?.name}. Manage your insurance information and payments below.
+                Welcome back, {session?.user?.name}. 
+                {dashboardData?.summary && (
+                  <span className="block mt-1">
+                    You have {dashboardData.summary.servicesUnpaid} unpaid service{dashboardData.summary.servicesUnpaid !== 1 ? 's' : ''} 
+                    {dashboardData.summary.hasActiveInsurance 
+                      ? ' and active insurance on file' 
+                      : dashboardData.summary.insuranceNeedsReview 
+                        ? ' and insurance that needs review'
+                        : ' with no insurance on file'
+                    }.
+                  </span>
+                )}
               </p>
             </div>
           </div>
@@ -76,66 +154,33 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content Area */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-              <div className="text-center">
-                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
-                  <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Your Medical Services
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  Review your recent medical services and take action on any billing issues.
-                </p>
-                
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-                  <h3 className="text-sm font-medium text-blue-800 mb-3">Coming Soon:</h3>
-                  <ul className="text-sm text-blue-700 space-y-2 text-left">
-                    <li className="flex items-center">
-                      <svg className="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                      View detailed service information and pricing
-                    </li>
-                    <li className="flex items-center">
-                      <svg className="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                      Select services to pay at discounted rates
-                    </li>
-                    <li className="flex items-center">
-                      <svg className="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                      View insurance denial reasons and contact info
-                    </li>
-                  </ul>
-                </div>
+            <ServicesTable 
+              services={dashboardData?.services || []}
+              loading={dashboardLoading}
+              onSelectionChange={handleSelectionChange}
+            />
+            
+            {/* Action Buttons */}
+            {selectedServices.length > 0 && (
+              <div className="mt-6 flex flex-col sm:flex-row gap-4">
+                <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                  Pay Selected Services ({selectedTotals.selectedCount})
+                </button>
+                <button className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                  Update Insurance Instead
+                </button>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Insurance Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center mb-4">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
-                </div>
-                <h3 className="ml-2 text-lg font-medium text-gray-900">Insurance Information</h3>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">
-                Update your insurance card information or upload new images.
-              </p>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                Update Insurance
-              </button>
-            </div>
+            {/* Insurance Panel */}
+            <InsurancePanel
+              insuranceCard={dashboardData?.insuranceCard || null}
+              loading={dashboardLoading}
+              onUpdate={fetchDashboardData}
+            />
 
             {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

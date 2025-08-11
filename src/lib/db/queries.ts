@@ -1,6 +1,6 @@
 import { db } from './index';
-import { patients, services, insuranceCards, magicLinks, payments, patientActions } from './schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { patients, services, insuranceCards, insuranceUpdates, magicLinks, payments, patientActions } from './schema';
+import { eq, desc } from 'drizzle-orm';
 import type { Patient, Service, InsuranceCard, MagicLink } from './schema';
 
 // Patient queries
@@ -74,7 +74,8 @@ export async function getInsuranceCardByPatientId(patientId: string): Promise<In
   const result = await db
     .select()
     .from(insuranceCards)
-    .where(and(eq(insuranceCards.patientId, patientId), eq(insuranceCards.isActive, true)))
+    .where(eq(insuranceCards.patientId, patientId))
+    .orderBy(desc(insuranceCards.createdAt))
     .limit(1);
   return result[0] || null;
 }
@@ -101,6 +102,12 @@ export async function updateInsuranceCardImages(cardId: string, frontImageUrl?: 
     .set(updateData)
     .where(eq(insuranceCards.id, cardId))
     .returning();
+  return result[0];
+}
+
+// Insurance update queries
+export async function createInsuranceUpdate(updateData: Omit<typeof insuranceUpdates.$inferInsert, 'id' | 'createdAt'>) {
+  const result = await db.insert(insuranceUpdates).values(updateData).returning();
   return result[0];
 }
 
